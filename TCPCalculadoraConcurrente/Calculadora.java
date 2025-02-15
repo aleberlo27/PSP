@@ -1,0 +1,62 @@
+package TCPCalculadoraConcurrente;
+
+
+
+public class Calculadora {
+    private int num1, num2, resultado;
+
+    public Calculadora (int n, int n2){
+        this.num1 = n;
+        this.num2 = n2;
+    }
+
+    public int getNum1() {
+        return num1;
+    }
+
+    public void setNum1(int num1) {
+        this.num1 = num1;
+    }
+
+    public int getNum2() {
+        return num2;
+    }
+
+    public void setNum2(int num2) {
+        this.num2 = num2;
+    }
+
+    public int getResultado() {
+        return resultado;
+    }
+
+    public void setResultado(int resultado) {
+        this.resultado = resultado;
+    }
+
+    public int sumar(){
+        return num1 + num2;
+    }
+    
+    public double restar(){
+        if (num1 < num2) { 
+            int temp = num1;
+            num1 = num2;
+            num2 = temp;
+        }
+        return num1 - num2;
+    }
+
+    public double multiplicar(){
+        return num1 * num2;
+    }
+
+    public double dividir(){
+        if (num2 == 0) {
+            System.out.println("Error: No se puede dividir por cero.");
+            return 0;
+        }
+        return num1 / num2;
+    }
+    
+}
