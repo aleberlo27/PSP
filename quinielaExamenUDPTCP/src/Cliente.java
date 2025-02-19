@@ -1,3 +1,4 @@
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -12,45 +13,53 @@ public class Cliente{
     public static void main(String[] args) throws IOException, NoSuchAlgorithmException, ClassNotFoundException {
         String servidor = "localhost";
         int puertoUDP = 5000;
-        int puertoTCP = 6000;
-        byte[] buffer = new byte[1024];
-    
+        int puertoTCP = 6000;    
       
-        //Enviamos la quiniela por el servidor UDP
+        //CONECTAMOS CON UDP
         DatagramSocket socketUDP = new DatagramSocket();
         Quiniela miQuiniela = new Quiniela();
+        
+        //Serializamos la quiniela para enviarla por bytes
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        ObjectOutputStream salidaUDP = new ObjectOutputStream(baos);
+        salidaUDP.writeObject(miQuiniela);
+        byte[] quinielaBytes = baos.toByteArray();
 
-        ByteArrayOutputStream array = new ByteArrayOutputStream();
-        ObjectOutputStream oos = new ObjectOutputStream(array);
-        oos.writeObject(miQuiniela);
-        byte[] quinielaBytes = array.toByteArray();
+        //Enviamos el objeto serializado al servidorUDP
+        DatagramPacket paqueteEnvio = new DatagramPacket(quinielaBytes, quinielaBytes.length, InetAddress.getByName(servidor), puertoUDP);
+        socketUDP.send(paqueteEnvio);
+        System.out.println("Enviada Quiniela al Servidor UDP...");
 
-        DatagramPacket paqueteUDP = new DatagramPacket(quinielaBytes, quinielaBytes.length, InetAddress.getByName(servidor), puertoUDP);
-        socketUDP.send(paqueteUDP);
-
-        //Recibimos el hash de la quiniela que nos devuelve el servidor UDP
+        //Recibimos la respuesta del Servidor UDP
+        byte[] buffer = new byte[1024];
         DatagramPacket paqueteRecibido = new DatagramPacket(buffer, buffer.length);
         socketUDP.receive(paqueteRecibido);
-        String hashMiQuiniela = new String(paqueteRecibido.getData());
-        System.out.println("Se ha recibido el hash de la quiniela: "+ hashMiQuiniela + "\nLa quiniela es: "+miQuiniela.getQuiniela()); 
 
-        //Enviamos el hash para que nos lo valide al servidor TCP
-        Socket socketTCP = new Socket(servidor, puertoTCP);
-        ObjectOutputStream salidaTCP = new ObjectOutputStream(socketTCP.getOutputStream());
-        ObjectInputStream entradaTCP = new ObjectInputStream(socketTCP.getInputStream());
-        salidaTCP.writeObject(hashMiQuiniela);
+        //Deserializamos la respuesta porque llega como un array de bytes y necesitamos el objeto
+        ObjectInputStream entradaUDP = new ObjectInputStream(new ByteArrayInputStream(paqueteRecibido.getData()));
+        miQuiniela = (Quiniela) entradaUDP.readObject();
+        System.out.println("Quiniela recibida con hash generado:");
+        System.out.println("Quiniela: " + miQuiniela.getQuiniela());
+        System.out.println("Hash: " + miQuiniela.getHashQuiniela());
 
-        //Recibimos la respuesta del servidor TCP
-        String respuestaTCP = (String) entradaTCP.readObject();
-        System.out.println("El servidor TCP valida nuestro hash. \n"+respuestaTCP);
+        //CONECTAMOS CON TCP
+        Socket socketClienteTCP = new Socket(servidor, puertoTCP);
 
-        //Nos devuelve el resultado del hash valido y la quiniela válida
-        String resultadoQuinielaValida = (String) entradaTCP.readObject();
-        System.out.println(resultadoQuinielaValida);
+        //Enviamos objeto a TCP
+        ObjectOutputStream salidaTCP = new ObjectOutputStream(socketClienteTCP.getOutputStream());
+        salidaTCP.writeObject(miQuiniela);
 
-        //Cerramos el socket de UDP
+        //Recibimos la salida del TCP
+        ObjectInputStream entradaTCP = new ObjectInputStream(socketClienteTCP.getInputStream());
+        System.out.println(entradaTCP.readObject());
+        System.out.println(entradaTCP.readObject());
+        System.out.println(entradaTCP.readObject());
+
+        entradaUDP.close();
+        salidaUDP.close();
         socketUDP.close();
-        //Cerramos el socket TCP
-        socketTCP.close();
+        entradaTCP.close();
+        salidaTCP.close();
+        socketClienteTCP.close();
     }
 }

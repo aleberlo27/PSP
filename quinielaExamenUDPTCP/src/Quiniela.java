@@ -10,7 +10,7 @@ public class Quiniela implements Serializable {
 
     public Quiniela() throws NoSuchAlgorithmException{
         quiniela = MetodosEstaticos.generarQuinielaAleatoria();
-        hashQuiniela = MetodosEstaticos.generarHashMD5(quiniela);
+        //hashQuiniela = MetodosEstaticos.generarHashMD5(quiniela); #se va a setear en el UDP
     }
     
     public String getHashQuiniela(){
@@ -21,21 +21,19 @@ public class Quiniela implements Serializable {
         return quiniela;
     }
 
-    public void setQuiniela(String datos) throws NoSuchAlgorithmException{
+    public void setHashQuiniela(String datos) throws NoSuchAlgorithmException{
         this.quiniela = datos;
         this.hashQuiniela = MetodosEstaticos.generarHashMD5(quiniela);
     }
 
-    public static String getHashQuinielaValida() throws NoSuchAlgorithmException{
+    public String getHashQuinielaValida() throws NoSuchAlgorithmException{
         String hashQuinielaValida = MetodosEstaticos.generarHashMD5(quinielaValida);
         return hashQuinielaValida;
     }
 
     public String toString(){
         try {
-            return "Quiniela: " + quiniela + 
-                   "\nHash de la Quiniela: " + hashQuiniela + 
-                   "\nQuiniela válida: " + quinielaValida + 
+            return "\nQuiniela válida: " + quinielaValida + 
                    "\nHash Quiniela Válida: " + getHashQuinielaValida();
         } catch (NoSuchAlgorithmException e) {
             e.printStackTrace();
