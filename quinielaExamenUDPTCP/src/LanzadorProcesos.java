@@ -1,12 +1,27 @@
 public class LanzadorProcesos {
     public static void main(String[] args) throws Exception {
-        //Ejecutamos los servidores
-        new ProcessBuilder("java", "C:\\Users\\usuario\\Documents\\2DAM\\PSP\\TEMA 3\\quinielaExamenUDPTCP\\bin\\ServidorUDP").inheritIO().start(); 
-        new ProcessBuilder("java", "C:\\Users\\usuario\\Documents\\2DAM\\PSP\\TEMA 3\\quinielaExamenUDPTCP\\bin\\ServidorTCP").inheritIO().start();
+        try {
+            String javaHome = System.getProperty("java.home") + "/bin/java";
 
-        //Ejecutamos 7 clientes por separado
-        for (int i = 0; i < 7; i++) {
-            new ProcessBuilder("java", "C:\\Users\\usuario\\Documents\\2DAM\\PSP\\TEMA 3\\quinielaExamenUDPTCP\\bin\\Cliente").inheritIO().start();
+            //Lanzar Servidor UDP
+            ProcessBuilder servidorUDP = new ProcessBuilder(javaHome, "ServidorUDP");
+            servidorUDP.start();
+
+            //Lanzar Servidor TCP
+            ProcessBuilder servidorTCP = new ProcessBuilder(javaHome, "ServidorTCP");
+            servidorTCP.start();
+
+            //Lanzar 7 Clientes
+            for (int i = 1; i <= 7; i++) {
+                ProcessBuilder cliente = new ProcessBuilder(javaHome, "Cliente");
+                cliente.start();
+                Thread.sleep(500); 
+            }
+
+            System.out.println("Todos los procesos han finalizado.");
+
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 }
